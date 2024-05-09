@@ -1,0 +1,10 @@
+.autocomplete {
+  width: 600px;
+}
+
+.autocomplete input[type=text] {
+  width: 100%;
+  height: 50px;
+  border-radius: 6px;
+  padding: 10px 12px;
+}
