@@ -15,7 +15,7 @@ const Autocomplete: React.FC<Props> = ({ data, isLoading, error }) => {
 
   useEffect(() => {
     inputRef.current?.focus()
-  }, [])
+  }, [isLoading])
 
   const filteredSearch = useMemo(() =>
     data.filter(item => item.title.toLowerCase().includes(searchValue.toLowerCase())),
@@ -50,7 +50,8 @@ const Autocomplete: React.FC<Props> = ({ data, isLoading, error }) => {
           <input
             type="text"
             ref={inputRef}
-            placeholder="Type something..."
+            placeholder={isLoading ? "Loading..." : "Type something..."}
+            disabled={isLoading || !!error}
             value={searchValue}
             onChange={onChange}
           />
