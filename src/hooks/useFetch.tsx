@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { type Post } from '../types'
+import { type DataReturn, type Post } from '../types'
 import { API } from '../constants'
 
-export const useFetch = (url: string) => {
+export const useFetch = (url: string): DataReturn => {
   const [data, setData] = useState<Post[]>([])
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)

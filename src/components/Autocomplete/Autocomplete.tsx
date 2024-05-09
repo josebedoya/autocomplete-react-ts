@@ -1,16 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import './Autocomplete.styles.css'
-import { type Post } from '../../types'
+import { type DataReturn } from '../../types'
 
-interface Props {
-  data: Post[];
-  isLoading: boolean;
-  error: string | null;
-}
-
-const Autocomplete: React.FC<Props> = ({ data, isLoading, error }) => {
+const Autocomplete: React.FC<DataReturn> = ({ data, isLoading, error }) => {
   const [searchValue, setSearchValue] = useState('')
   const [showSuggestions, setShowSuggestions] = useState(false)
+  const [selectedIndex, setSelectedIndex] = useState(-1)
   const inputRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
@@ -31,6 +26,30 @@ const Autocomplete: React.FC<Props> = ({ data, isLoading, error }) => {
     setSearchValue(event.target.value)
     setShowSuggestions(!!filteredSearch)
   }, [filteredSearch])
+
+  const onFocus = useCallback(() => {
+    setShowSuggestions(!!filteredSearch && !!searchValue)
+  }, [filteredSearch, searchValue])
+
+  const onBlur = useCallback(() => {
+    setTimeout(() => {
+      setShowSuggestions(false)
+    }, 200)
+  }, [])
+
+  const onKeyDown = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'ArrowDown' && selectedIndex < filteredSearch.length - 1) {
+      setSelectedIndex(selectedIndex + 1)
+    }
+    if (event.key === 'ArrowUp' && selectedIndex > 0) {
+      setSelectedIndex(selectedIndex - 1)
+    }
+    if (event.key === 'Enter' && selectedIndex >= 0) {
+      setSearchValue(filteredSearch[selectedIndex].title)
+      setShowSuggestions(false)
+      setSelectedIndex(-1)
+    }
+  }, [selectedIndex, filteredSearch])
 
   const highlightText = (text: string, query: string) => {
     const parts = text.split(new RegExp(`(${query})`, `gi`))
@@ -54,13 +73,17 @@ const Autocomplete: React.FC<Props> = ({ data, isLoading, error }) => {
             disabled={isLoading || !!error}
             value={searchValue}
             onChange={onChange}
+            onFocus={onFocus}
+            onBlur={onBlur}
+            onKeyDown={onKeyDown}
           />
           {showSuggestions && (
             <ul>
-              {filteredSearch?.map((item) => (
+              {filteredSearch?.map((item, index) => (
                 <li
                   key={item.id}
                   onClick={() => handleSelectSuggestion(item.title)}
+                  className={index === selectedIndex ? "selected" : ""}
                 >
                   {highlightText(item.title, searchValue)}
                 </li>
