@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import './Autocomplete.styles.css'
 import { type Post } from '../../types'
 
@@ -16,6 +16,11 @@ const Autocomplete: React.FC<Props> = ({ data, isLoading, error }) => {
     inputRef.current?.focus()
   }, [])
 
+  const filteredSearch = useMemo(() =>
+    data.filter(item => item.title.toLowerCase().includes(searchValue.toLowerCase())),
+    [data, searchValue]
+  )
+
 
 
   return (
@@ -29,6 +34,15 @@ const Autocomplete: React.FC<Props> = ({ data, isLoading, error }) => {
           value={searchValue}
           onChange={(event) => setSearchValue(event.target.value)}
         />
+        <ul>
+          {filteredSearch?.map((item) => (
+            <li
+              key={item.id}
+            >
+              {item.title}
+            </li>
+          ))}
+        </ul>
       </div>
     </>
   )
