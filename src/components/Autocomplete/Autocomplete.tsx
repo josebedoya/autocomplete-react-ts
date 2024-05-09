@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import './Autocomplete.styles.css'
 import { type Post } from '../../types'
 
@@ -27,7 +27,19 @@ const Autocomplete: React.FC<Props> = ({ data, isLoading, error }) => {
     setShowSuggestions(false)
   }, [])
 
+  const onChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchValue(event.target.value)
+    setShowSuggestions(!!filteredSearch)
+  }, [filteredSearch])
 
+  const highlightText = (text: string, query: string) => {
+    const parts = text.split(new RegExp(`(${query})`, `gi`))
+    return parts.map((part, index) =>
+      part.toLowerCase() === query.toLowerCase()
+        ? <span key={index} className="highlight">{part}</span>
+        : part
+    )
+  }
 
   return (
     <>
@@ -40,7 +52,7 @@ const Autocomplete: React.FC<Props> = ({ data, isLoading, error }) => {
             ref={inputRef}
             placeholder="Type something..."
             value={searchValue}
-            onChange={(event) => setSearchValue(event.target.value)}
+            onChange={onChange}
           />
           {showSuggestions && (
             <ul>
@@ -49,7 +61,7 @@ const Autocomplete: React.FC<Props> = ({ data, isLoading, error }) => {
                   key={item.id}
                   onClick={() => handleSelectSuggestion(item.title)}
                 >
-                  {item.title}
+                  {highlightText(item.title, searchValue)}
                 </li>
               ))}
             </ul>
