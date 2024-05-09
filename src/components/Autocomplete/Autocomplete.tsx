@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import './Autocomplete.styles.css'
 import { type Post } from '../../types'
 
@@ -10,6 +10,7 @@ interface Props {
 
 const Autocomplete: React.FC<Props> = ({ data, isLoading, error }) => {
   const [searchValue, setSearchValue] = useState('')
+  const [showSuggestions, setShowSuggestions] = useState(false)
   const inputRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
@@ -21,29 +22,44 @@ const Autocomplete: React.FC<Props> = ({ data, isLoading, error }) => {
     [data, searchValue]
   )
 
+  const handleSelectSuggestion = useCallback((title: string) => {
+    setSearchValue(title)
+    setShowSuggestions(false)
+  }, [])
+
 
 
   return (
     <>
       <h1>Autocomplete</h1>
-      <div className="autocomplete">
-        <input
-          type="text"
-          ref={inputRef}
-          placeholder="Type something..."
-          value={searchValue}
-          onChange={(event) => setSearchValue(event.target.value)}
-        />
-        <ul>
-          {filteredSearch?.map((item) => (
-            <li
-              key={item.id}
-            >
-              {item.title}
-            </li>
-          ))}
-        </ul>
-      </div>
+      {error && <div>{error}</div>}
+      {data && !error && (
+        <div className="autocomplete">
+          <input
+            type="text"
+            ref={inputRef}
+            placeholder="Type something..."
+            value={searchValue}
+            onChange={(event) => setSearchValue(event.target.value)}
+          />
+          {showSuggestions && (
+            <ul>
+              {filteredSearch?.map((item) => (
+                <li
+                  key={item.id}
+                  onClick={() => handleSelectSuggestion(item.title)}
+                >
+                  {item.title}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {searchValue && filteredSearch.length === 0 && (
+        <p>No matching results.</p>
+      )}
     </>
   )
 }
